@@ -1,0 +1,515 @@
+{{ 'component-card.css' | asset_url | stylesheet_tag }}
+{{ 'component-price.css' | asset_url | stylesheet_tag }}
+{{ 'section-related-products.css' | asset_url | stylesheet_tag }}
+{{ 'template-collection.css' | asset_url | stylesheet_tag }}
+  {{ 'quick-add.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'quick-add.js' | asset_url }}" defer="defer"></script>
+  <script src="{{ 'product-form.js' | asset_url }}" defer="defer"></script>
+{% if section.settings.image_shape == 'blob' %}
+  {{ 'mask-blobs.css' | asset_url | stylesheet_tag }}
+{%- endif -%}
+
+{%- style -%}
+  .section-{{ section.id }}-padding {
+    padding-top: {{ section.settings.padding_top | times: 0.75 | round: 0 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | times: 0.75 | round: 0 }}px;
+  }
+
+  @media screen and (min-width: 750px) {
+    .section-{{ section.id }}-padding {
+      padding-top: {{ section.settings.padding_top }}px;
+      padding-bottom: {{ section.settings.padding_bottom }}px;
+    }
+    .custom-slider-futured-collection .sliderc  .slick-slide.grid__item{
+  max-width:unset;
+}
+  }
+.relaated-div-slider{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 4rem;
+}
+.custom-slider-futured-collection .sliderc  .slick-slide.grid__item{
+  max-width:unset;
+}
+{%- endstyle -%}
+
+<div class="custom-slider-futured-collection color-{{ section.settings.color_scheme }} gradient no-js-hidden">
+  <product-recommendations
+    class="related-products  section-{{ section.id }}-padding isolate{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}"
+    data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.products_to_show }}"
+  >
+    {% if recommendations.performed and recommendations.products_count > 0 %}
+     <div class="relaated-div-slider page-width">
+        <h2 class="related-products__heading inline-richtext {{ section.settings.heading_size }}">
+          {{ section.settings.heading }}
+        </h2>
+        <div class="center collection__view-all{% if settings.animations_reveal_on_scroll %} scroll-trigger animate--slide-in{% endif %}">
+          <a
+            href="{{ section.settings.collection.url }}"
+            class="{% if section.settings.view_all_style == 'link' %}link underlined-link{% elsif section.settings.view_all_style == 'solid' %}button{% else %}button button--primary{% endif %}"
+            aria-label="{{ 'sections.featured_collection.view_all_label' | t: collection_name: section.settings.collection.title | escape }}"
+          >
+            {{ 'sections.featured_collection.view_all' | t }}
+          </a>
+        </div>
+     </div>
+      <div
+        class=" sliderc product-grid  grid--{{ section.settings.columns_mobile }}-col-tablet-down cutom-slide-div"
+        role="list"
+      >
+        {% for recommendation in recommendations.products %}
+          <div class="grid__item">
+            {% render 'card-product',
+              card_product: recommendation,
+              media_aspect_ratio: section.settings.image_ratio,
+              image_shape: section.settings.image_shape,
+              show_secondary_image: section.settings.show_secondary_image,
+              show_vendor: section.settings.show_vendor,
+              show_rating: section.settings.show_rating,
+              show_quick_add: true,
+              section_id: section.id
+            %}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </product-recommendations>
+  {% if section.settings.image_shape == 'arch' %}
+    {% render 'mask-arch' %}
+  {%- endif -%}
+</div>
+
+<script>
+
+  
+// setTimeout(function(){
+// $(document).ready(function() {
+//   var $slider = $('.hello');
+//   var $progressBar = $('.progress');
+//   var $progressBarLabel = $( '.slider__label' );
+  
+//   $slider.on('beforeChange', function(event, slick, currentSlide, nextSlide) { 
+//     var calc = (( (nextSlide) + 5 / (slick.slideCount) ) * 100)*2;
+//     $progressBar
+//       .css('background-size', calc + '% 100%')
+//       .attr('aria-valuenow', calc );
+    
+//     $progressBarLabel.text( calc + '% completed' );
+//   });
+  
+//   $slider.slick({
+//     dots: true,
+//     slidesToShow: {{ section.settings.columns_desktop }},
+//     slidesToScroll: 4,
+//     speed: 400,
+//     infinate: false,
+//     loop: false,
+//     adaptiveHeight: true,
+//         responsive: [
+//               {
+//       breakpoint: 990,
+//         settings: {
+//         slidesToShow: 2,
+//         slidesToScroll: 2,
+//         adaptiveHeight: true,
+//         infinate: false,
+//         loop: false,
+//       }
+//     },
+//     {
+//       breakpoint: 749,
+//       settings: {
+//         slidesToShow: {{ section.settings.columns_mobile }},
+//         slidesToScroll: 1,
+//           adaptiveHeight: true,
+//         infinate: false,
+//          loop: false,
+//       }
+//     },
+//     {
+//       breakpoint: 414,
+//       settings: {
+//         slidesToShow: 1,
+//         slidesToScroll: 1,
+//           adaptiveHeight: true,
+//          centerMode: true,
+//         infinate: false,
+//          loop: false,
+//       }
+//     }
+//   ]
+//   });  
+// });
+// },600);
+  function runCode() {
+  $(document).ready(function() {
+    var $slider = $('.sliderc');
+    var $progressBar = $('.progress');
+    var $progressBarLabel = $('.slider__label');
+
+    $slider.on('beforeChange', function(event, slick, currentSlide, nextSlide) {
+      var calc = (((nextSlide) + 5) / (slick.slideCount)) * 100 * 2;
+      $progressBar
+        .css('background-size', calc + '% 100%')
+        .attr('aria-valuenow', calc);
+
+      $progressBarLabel.text(calc + '% completed');
+    });
+
+    $slider.slick({
+      dots: true,
+      slidesToShow: {{ section.settings.columns_desktop }},
+      slidesToScroll: 4,
+      speed: 400,
+      infinate: false,
+      loop: false,
+      adaptiveHeight: true,
+      responsive: [{
+          breakpoint: 990,
+          settings: {
+            slidesToShow: 2,
+            slidesToScroll: 2,
+            adaptiveHeight: true,
+            infinate: false,
+            loop: false,
+          }
+        },
+        {
+          breakpoint: 749,
+          settings: {
+            slidesToShow: {{ section.settings.columns_mobile }},
+            slidesToScroll: 1,
+            adaptiveHeight: true,
+            infinate: false,
+            loop: false,
+          }
+        },
+        {
+          breakpoint: 414,
+          settings: {
+            slidesToShow: 1,
+            slidesToScroll: 1,
+            adaptiveHeight: true,
+            centerMode: true,
+            infinate: false,
+            loop: false,
+          }
+        }
+      ]
+    });
+  });
+}
+
+setTimeout(runCode, 600); // First run after 600 milliseconds
+setTimeout(runCode, 1200);
+</script>
+{% schema %}
+{
+  "name": "t:sections.related-products.name",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "t:sections.related-products.settings.paragraph__1.content"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "heading",
+      "default": "You may also like",
+      "label": "t:sections.related-products.settings.heading.label"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "options": [
+        {
+          "value": "h2",
+          "label": "t:sections.all.heading_size.options__1.label"
+        },
+        {
+          "value": "h1",
+          "label": "t:sections.all.heading_size.options__2.label"
+        },
+        {
+          "value": "h0",
+          "label": "t:sections.all.heading_size.options__3.label"
+        }
+      ],
+      "default": "h1",
+      "label": "t:sections.all.heading_size.label"
+    },
+        {
+      "type": "collection",
+      "id": "collection",
+      "label": "t:sections.featured-collection.settings.collection.label"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "default": 4,
+      "label": "t:sections.related-products.settings.products_to_show.label"
+    },
+    {
+      "type": "range",
+      "id": "columns_desktop",
+      "min": 1,
+      "max": 5,
+      "step": 1,
+      "default": 4,
+      "label": "t:sections.related-products.settings.columns_desktop.label"
+    },
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "t:sections.all.colors.label",
+      "info": "t:sections.all.colors.has_cards_info",
+      "default": "scheme-1"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.related-products.settings.header__2.content"
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        {
+          "value": "adapt",
+          "label": "t:sections.related-products.settings.image_ratio.options__1.label"
+        },
+        {
+          "value": "portrait",
+          "label": "t:sections.related-products.settings.image_ratio.options__2.label"
+        },
+        {
+          "value": "square",
+          "label": "t:sections.related-products.settings.image_ratio.options__3.label"
+        }
+      ],
+      "default": "adapt",
+      "label": "t:sections.related-products.settings.image_ratio.label"
+    },
+    {
+      "type": "select",
+      "id": "image_shape",
+      "options": [
+        {
+          "value": "default",
+          "label": "t:sections.all.image_shape.options__1.label"
+        },
+        {
+          "value": "arch",
+          "label": "t:sections.all.image_shape.options__2.label"
+        },
+        {
+          "value": "blob",
+          "label": "t:sections.all.image_shape.options__3.label"
+        },
+        {
+          "value": "chevronleft",
+          "label": "t:sections.all.image_shape.options__4.label"
+        },
+        {
+          "value": "chevronright",
+          "label": "t:sections.all.image_shape.options__5.label"
+        },
+        {
+          "value": "diamond",
+          "label": "t:sections.all.image_shape.options__6.label"
+        },
+        {
+          "value": "parallelogram",
+          "label": "t:sections.all.image_shape.options__7.label"
+        },
+        {
+          "value": "round",
+          "label": "t:sections.all.image_shape.options__8.label"
+        }
+      ],
+      "default": "default",
+      "label": "t:sections.all.image_shape.label",
+      "info": "t:sections.all.image_shape.info"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_secondary_image",
+      "default": false,
+      "label": "t:sections.related-products.settings.show_secondary_image.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_vendor",
+      "default": false,
+      "label": "t:sections.related-products.settings.show_vendor.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_rating",
+      "default": false,
+      "label": "t:sections.related-products.settings.show_rating.label",
+      "info": "t:sections.related-products.settings.show_rating.info"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.related-products.settings.header_mobile.content"
+    },
+    {
+      "type": "select",
+      "id": "columns_mobile",
+      "default": "1",
+      "label": "t:sections.related-products.settings.columns_mobile.label",
+      "options": [
+        {
+          "value": "1",
+          "label": "t:sections.related-products.settings.columns_mobile.options__1.label"
+        },
+        {
+          "value": "2",
+          "label": "t:sections.related-products.settings.columns_mobile.options__2.label"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "t:sections.all.padding.section_padding_heading"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_top",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "t:sections.all.padding.padding_bottom",
+      "default": 36
+    }
+  ]
+}
+{% endschema %}
+// in global js add also this
+class ProductRecommendations extends HTMLElement {
+
+  constructor() {
+    super();
+     this.connectedCallbackCount = 0;
+  }
+
+ connectedCallback() {
+    const handleIntersection = (entries, observer) => {
+      if (!entries[0].isIntersecting) return;
+      observer.unobserve(this);
+
+      fetch(this.dataset.url)
+        .then((response) => response.text())
+        .then((text) => {
+          const html = document.createElement('div');
+          html.innerHTML = text;
+          const recommendations = html.querySelector('product-recommendations');
+          if (recommendations) {
+            const sliders = recommendations.querySelectorAll('.sliderc');
+            sliders.forEach(function(slider) {
+              slider.classList.add('hello');
+            });
+          }
+          if (recommendations && recommendations.innerHTML.trim().length) {
+            this.innerHTML = recommendations.innerHTML;
+          }
+
+          if (!this.querySelector('slideshow-component') && this.classList.contains('complementary-products')) {
+            this.remove();
+          }
+
+          if (html.querySelector('.grid__item')) {
+            this.classList.add('product-recommendations--loaded');
+            recommendations
+            runCode();
+          }
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    };
+
+    new IntersectionObserver(handleIntersection.bind(this), { rootMargin: '0px 0px 400px 0px' }).observe(this);
+  }
+
+}
+
+
+customElements.define('product-recommendations', ProductRecommendations);
+ function runCode() {
+   var data_desktop_slider = document.querySelector('.sliderc').getAttribute('data-desktop-slider');
+var data_mobile_slider = document.querySelector('.sliderc').getAttribute('data-mobile-slider');
+  $(document).ready(function() {
+    var $slider = $('.sliderc');
+    var $progressBar = $('.progress');
+    var $progressBarLabel = $('.slider__label');
+
+    $slider.on('beforeChange', function(event, slick, currentSlide, nextSlide) {
+      var calc = (((nextSlide) + 5) / (slick.slideCount)) * 100 * 2;
+      $progressBar
+        .css('background-size', calc + '% 100%')
+        .attr('aria-valuenow', calc);
+
+      $progressBarLabel.text(calc + '% completed');
+    });
+
+    $slider.slick({
+      dots: true,
+      slidesToShow: data_desktop_slider,
+      slidesToScroll: 4,
+      speed: 400,
+      infinate: false,
+      loop: false,
+      adaptiveHeight: true,
+      responsive: [{
+          breakpoint: 990,
+          settings: {
+            slidesToShow: 2,
+            slidesToScroll: 2,
+            adaptiveHeight: true,
+            infinate: false,
+            loop: false,
+          }
+        },
+        {
+          breakpoint: 749,
+          settings: {
+            slidesToShow: 3,
+            slidesToScroll: 1,
+            adaptiveHeight: true,
+            infinate: false,
+            loop: false,
+          }
+        },
+        {
+          breakpoint: 414,
+          settings: {
+            slidesToShow: data_mobile_slider,
+            slidesToScroll: 1,
+            adaptiveHeight: true,
+            centerMode: true,
+            infinate: false,
+            loop: false,
+          }
+        }
+      ]
+    });
+  });
+}
