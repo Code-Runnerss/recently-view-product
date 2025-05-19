@@ -1,0 +1,172 @@
+main-product.liquid
+------------------------------------------------------
+
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+    let productHandle = "{{ product.handle }}"; // Shopify dynamically replaces this
+    let productTitle = "{{ product.title | escape }}";
+    let productImage = "{{ product.featured_image | img_url: 'medium' }}";
+    let productUrl = "{{ product.url }}";
+
+    // Get existing viewed products from localStorage
+    let viewedProducts = JSON.parse(localStorage.getItem("recentlyViewed")) || [];
+
+    // Remove the current product if already in the list
+    viewedProducts = viewedProducts.filter(product => product.handle !== productHandle);
+
+    // Add the current product at the beginning
+    viewedProducts.unshift({ handle: productHandle, title: productTitle, image: productImage, url: productUrl });
+
+    let limit = 8; // Set the number of products to display
+    viewedProducts = viewedProducts.slice(0, limit);
+
+    // Save back to localStorage
+    localStorage.setItem("recentlyViewed", JSON.stringify(viewedProducts));
+
+    // Display recently viewed products
+    let container = document.getElementById("recently-viewed-products");
+
+    if (viewedProducts.length > 1) { // Show only if more than one product is viewed
+        viewedProducts.forEach((product, index) => {
+            if (index > 0) { // Exclude the current product
+                let productHtml = `
+                    <div class="recent-product">
+                        <a href="${product.url}">
+                            <img src="${product.image}" alt="${product.title}">
+                            <p>${product.title}</p>
+                        </a>
+                    </div>`;
+                container.innerHTML += productHtml;
+            }
+        });
+    } else {
+        document.getElementById("recently-viewed-section").style.display = "none";
+    }
+});
+
+</script>
+
+
+
+<div id="recently-viewed-section">
+    <h2>Recently Viewed Products</h2>
+    <div id="recently-viewed-products" class="recently-viewed-container"></div>
+</div>
+
+
+<style>
+    .recently-viewed-container {
+        display: flex;
+        gap: 15px;
+        overflow-x: auto;
+    }
+    .recent-product {
+        text-align: center;
+        min-width: 120px;
+    }
+    .recent-product img {
+        width: 100px;
+        height: auto;
+        border-radius: 5px;
+    }
+</style>
+
+
+
+
+----------------------------------------------------------------------------------------
+js for slider when one side product are complete after then second side button is show
+
+document.addEventListener("DOMContentLoaded", function () {
+    let productHandle = "{{ product.handle }}";
+    let productTitle = "{{ product.title | escape }}";
+    let productImage = "{{ product.featured_image | img_url: 'medium' }}";
+    let productUrl = "{{ product.url }}";
+
+    let viewedProducts = JSON.parse(localStorage.getItem("recentlyViewed")) || [];
+
+    viewedProducts = viewedProducts.filter(product => product.handle !== productHandle);
+    viewedProducts.unshift({ handle: productHandle, title: productTitle, image: productImage, url: productUrl });
+
+    let limit = 5;
+    localStorage.setItem("recentlyViewed", JSON.stringify(viewedProducts));
+
+    let container = document.getElementById("recently-viewed-products");
+    let productHtml = "";
+
+    if (viewedProducts.length > 0) {
+        if (viewedProducts.length > limit) {
+            // Swiper structure with navigation buttons
+            productHtml += `
+                <div class="swiper-container">
+                    <div class="swiper-wrapper">`;
+
+            viewedProducts.forEach(product => {
+                productHtml += `
+                    <div class="swiper-slide">
+                        <a href="${product.url}">
+                            <img src="${product.image}" alt="${product.title}">
+                            <p>${product.title}</p>
+                        </a>
+                    </div>`;
+            });
+
+            productHtml += `</div>
+                <div class="swiper-button-prev" style="display: none;"></div> 
+                <div class="swiper-button-next"></div>
+            </div>`;
+        } else {
+            // Normal grid display if ≤ 5 products
+            viewedProducts.forEach(product => {
+                productHtml += `
+                    <div class="recent-product">
+                        <a href="${product.url}">
+                            <img src="${product.image}" alt="${product.title}">
+                            <p>${product.title}</p>
+                        </a>
+                    </div>`;
+            });
+        }
+
+        container.innerHTML = productHtml;
+
+        // Initialize Swiper only if more than 5 products
+        if (viewedProducts.length > limit) {
+            let swiper = new Swiper(".swiper-container", {
+                slidesPerView: 5,
+                spaceBetween: 10,
+                navigation: {
+                    nextEl: ".swiper-button-next",
+                    prevEl: ".swiper-button-prev"
+                },
+                on: {
+                    init: function () {
+                        checkNavigationVisibility(this);
+                    },
+                    slideChange: function () {
+                        checkNavigationVisibility(this);
+                    }
+                }
+            });
+
+            function checkNavigationVisibility(swiperInstance) {
+                let prevButton = document.querySelector(".swiper-button-prev");
+                let nextButton = document.querySelector(".swiper-button-next");
+
+                if (swiperInstance.isBeginning) {
+                    prevButton.style.display = "none"; // Hide left button initially
+                    nextButton.style.display = "block"; // Show right button
+                }
+
+                if (swiperInstance.isEnd) {
+                    nextButton.style.display = "none"; // Hide right button when all products are shown
+                    prevButton.style.display = "block"; // Show left button after scrolling to the end
+                }
+            }
+        }
+    } else {
+        document.getElementById("recently-viewed-section").style.display = "none";
+    }
+}); 
